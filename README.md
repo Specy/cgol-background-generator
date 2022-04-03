@@ -1,8 +1,7 @@
-# Svelte template
-This is the template i use when i create a new website with svelte, it includes:
-
-* Some standard components like buttons, inputs and form validation
-* Page transition and layout components
-* Navbar and Footer
-* Notification toast and theming stores
-* Ready to use JWT auth axios library
+# Conway game of life background generator 
+A webapp made with sveltekit, service workers and Canvas made to create background images using Conway game of life, or simply to play around.
+## Features
+* Draw, or randomise the canvas
+* Step through the generations 
+* Fully customisable color palette with generational trails 
+* Modern and sleek UI with animations and blur 
