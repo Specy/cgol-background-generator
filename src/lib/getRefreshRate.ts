@@ -1,7 +1,7 @@
-export function getScreenRefreshRate(callback, runIndefinitely){
+type Callback = (fps: number, DOMHighResTimeStampCollection: DOMHighResTimeStamp[]) => void;
+export function getScreenRefreshRate(callback: Callback, runIndefinitely = false) : void{
     let requestId = null;
     let callbackTriggered = false;
-    runIndefinitely = runIndefinitely || false;
 
     const DOMHighResTimeStampCollection = [];
 

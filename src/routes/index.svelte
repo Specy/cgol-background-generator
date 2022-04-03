@@ -121,7 +121,7 @@
 		}}
 		on:snapshot={() => {
 			cgol.download()
-			toast.success('Snapshot downlaoded')
+			toast.success('Snapshot downloaded')
 		}}
 		on:scale={handleScale}
 		on:step={handleStep}

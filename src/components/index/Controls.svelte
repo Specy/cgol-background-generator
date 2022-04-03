@@ -15,6 +15,7 @@
 	import MdFullscreenExit from 'svelte-icons/md/MdFullscreenExit.svelte'
 	import { DEFAULT_BACKGROUND, DEFAULT_COLOR } from '$lib/cgol'
 	import { browser } from '$app/env'
+	import Color from 'color';
 	const dispatch = createEventDispatcher()
 	const stepDispatch = createEventDispatcher<{ step: number }>()
 	export let scale = 1
@@ -26,13 +27,18 @@
 	export let trailToggled = true
 	let isOpen = false
 	let isFullscreen = false
+	let maskColor = new Color(backgroundColor)
+	$: {
+		const color = new Color(backgroundColor)
+		maskColor = color.isDark() ? color.lighten(0.3) : color.darken(0.2)
+	}
 </script>
 
 <svelte:window on:fullscreenchange={() => isFullscreen = document.fullscreenElement !== null} />
 <div class="floating-buttons">
 	{#if browser && document?.fullscreenEnabled}
 		<Button
-			style="height: 2.5rem; width: 2.5rem; padding: 0.6rem; "
+			style="height: 2.5rem; width: 2.5rem; padding: 0; "
 			hasIcon={true}
 			on:click={() => {
 				!document.fullscreenElement 
@@ -40,7 +46,7 @@
 					: document.exitFullscreen()
 			}}
 		>
-			<Icon>
+			<Icon size={1.8}>
 				{#if isFullscreen}
 					<MdFullscreenExit />
 				{:else}
@@ -65,10 +71,11 @@
 		<IoMdSettings />
 	</Button>
 </div>
+
 <div
 	class="controls-mask"
 	class:isOpen
-	style={`background-color: var(--controls-background); color:var(--controls-text)`}
+	style={`background-color: ${maskColor.fade(0.35)}; color:var(--controls-text)`}
 >
 	<div class="controls">
 		<ControlRow title="Controls" style="grid-area: a">
