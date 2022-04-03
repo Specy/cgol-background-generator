@@ -105,6 +105,17 @@ class Cgol{
             this.matrix = this.generations.pop()
         }
     }
+
+    paintNoise(x:number,y:number,noise:number): void{
+        try {
+            for (let i = 0; i < noise; i++) {
+                const noiseX = Math.round(Math.random() * -20 + 15)
+                const noiseY = Math.round(Math.random() * -20 + 15)
+                this.matrix[y + noiseY][x + noiseX] = 1
+            }
+            this.generationCounter++
+        } catch (e) { return }
+    }
     draw(): void{
         this.drawOnLayer(1,true)
         if(this.trailToggled) this.drawOnLayer(2,false)

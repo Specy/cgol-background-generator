@@ -1,12 +1,15 @@
 <script>
 	export let value = ''
     import Color from 'color'
+    let color = new Color(value)
+
+    $: color = new Color(value)
 </script>
 
 <input 
     type="color" 
     bind:value 
-    style={`border-color: ${Color(value).isDark() ? 'white' : 'black'}`}
+    style={`outline: solid 3px ${color.isDark() ? 'white' : 'black'}`}
 />
 
 <style>
@@ -16,8 +19,8 @@ input[type="color"] {
     height: 2.2rem;
     border: 0;
     border-radius: 0.4rem;
+    cursor: pointer;
     padding: 0;
-    border: solid 2px;
     overflow: hidden;
     box-shadow: 2px 2px 5px rgba(0,0,0,.1);
 }

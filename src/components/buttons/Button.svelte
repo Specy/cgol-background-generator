@@ -47,6 +47,6 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 0 0.8rem;
+		padding: 0.35rem 0.8rem;
 	}
 </style>

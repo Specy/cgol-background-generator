@@ -1,9 +1,10 @@
 <script>
     export let title = ''
+    export let style = ''
 </script>
 
 
-<div class='column-wrapper'>
+<div class='column-wrapper' {style}>
     <h1>{title}</h1>
     <div class="column">
         <slot></slot>

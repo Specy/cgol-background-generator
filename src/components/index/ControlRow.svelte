@@ -1,9 +1,10 @@
 <script>
     export let title = ''
+    export let style = ''
 </script>
 
 
-<div class='row-wrapper'>
+<div class='row-wrapper' {style}>
     <h1>{title}</h1>
     <div class="row">
         <slot></slot>
