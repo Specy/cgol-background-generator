@@ -1,6 +1,9 @@
 {
   "name": "svelte-template",
   "version": "0.0.1",
+  "engines": {
+    "node": "16.13.0"
+  },
   "scripts": {
     "dev": "svelte-kit dev ",
     "devHost": "svelte-kit dev --host",
