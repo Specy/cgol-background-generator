@@ -6,6 +6,10 @@ const config = {
 	preprocess: preprocess(),
 	kit: {
 		adapter: adapter(),
+		prerender: {
+			enabled:true,
+			default:true
+		},
 		vite: {
 			resolve: {
 				alias: {
