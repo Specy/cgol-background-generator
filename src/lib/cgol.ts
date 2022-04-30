@@ -48,6 +48,8 @@ class Cgol {
         return this.currentColor
     }
     async init(width: number, height: number, context: CanvasRenderingContext2D, contxt2: CanvasRenderingContext2D): Promise<void> {
+        width = Math.floor(width)
+        height = Math.floor(height)
         const { generateMatrix, calculateGeneration } = Comlink.wrap(new Worker('cgol-sw.js')) as CgolSW
         this.generateMatrix = generateMatrix
         this.calculateGeneration = calculateGeneration
@@ -59,7 +61,7 @@ class Cgol {
         this.context2 = contxt2
         this.generationCounter = 0
     }
-    dispose(): void{
+    dispose(): void {
         this.context = null
         this.context2 = null
     }
@@ -103,15 +105,16 @@ class Cgol {
             this.matrix = nextGeneration
             this.generationCounter++
         }
-
     }
     async step(direction: number): Promise<void> {
+
         if (direction > 0) {
             await this.tick()
         } else {
             if (this.generations.length <= 0) return
             this.matrix = this.generations.pop()
         }
+
     }
 
     paintNoise(x: number, y: number, noise: number): void {
@@ -145,22 +148,25 @@ class Cgol {
                     //if it's not, add each subpixel data
                     if (matrix[i][j]) {
                         //if the cell is alive add the selected color to the data
-                        data[counter++] = rgbObj.r
-                        data[counter++] = rgbObj.g
-                        data[counter++] = rgbObj.b
-                        data[counter++] = 255
-
+                        data[counter] = rgbObj.r
+                        data[counter + 1] = rgbObj.g
+                        data[counter + 2] = rgbObj.b
+                        data[counter + 3] = 255
+                        counter += 4
                     } else {
                         //if the cell is dead, turn the pixel black
-                        counter += 3
-                        data[counter++] = 0
+                        data[counter + 1] = 0
+                        counter += 4
+
                     }
                 }
             }
         }
+
         if (!erase) this.trailData = data
         //actually draw the image generated above
         context.putImageData(new ImageData(data, width, height), 0, 0)
+
     }
 
     private addGeneration(generation: Uint8ClampedArray[]): void {

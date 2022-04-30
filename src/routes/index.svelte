@@ -45,6 +45,7 @@
 		context = canvas.getContext('2d')
 		context2 = canvas2.getContext('2d')
 		await cgol.init(width, height, context, context2)
+		await cgol.recreate(width, height, $scale)
 		cgol.setMainColor($mainColor)
 		cgol.setPalette($palette)
 		cgol.randomize()
@@ -59,8 +60,8 @@
 	function handlePointer(eventX: number, eventY: number, e: any) {
 		//@ts-ignore
 		if (!isPressing || e.target?.tagName !== 'CANVAS') return
-		const x = Math.floor((eventX / width) * width)
-		const y = Math.floor((eventY / height) * height)
+		const x = Math.floor((eventX / width) * cgol.width)
+		const y = Math.floor((eventY / height) * cgol.height)
 		const noise = Math.round(Math.random() * 10 + 30)
 		cgol.paintNoise(x, y, noise)
 	}
