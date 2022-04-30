@@ -1,42 +1,34 @@
 /* eslint-disable no-undef */
 importScripts("https://unpkg.com/comlink/dist/umd/comlink.js");
 
-function generateMatrix(width,height) {
-    //function that creates a matrix, in which there will be stored the alive/dead cells
-    const matrix = new Array(height).fill(0)
-    for (let i = 0; i < height; i++) {
-        matrix[i] = new Uint8ClampedArray(width)
-    }
-    return matrix
-}
-
-function calculateGeneration(matrix) {
-    const width = (matrix[0]?.length || 1)  - 1
-    const height = (matrix.length || 1) - 1
-    const nextGen = generateMatrix(width + 1, height + 1)
-
-    for (let i = 1; i < height; i++) {
-        for (let j = 1; j < width; j++) {
+function calculateGeneration(gen, width, height) {
+    const nextGen = new Uint8ClampedArray(width * height)
+    
+    for (let i = 1; i < height - 1; i++) {
+        const row = i * width
+        for (let j = 1; j < width - 1; j++) {
             //checks for every neighbour, 1 is alive, 0 is dead
-            let neighbours = matrix[i - 1][j - 1] +
-                matrix[i - 1][j] +
-                matrix[i - 1][j + 1] +
-                matrix[i][j - 1] +
-                matrix[i][j + 1] +
-                matrix[i + 1][j - 1] +
-                matrix[i + 1][j] +
-                matrix[i + 1][j + 1]
-            if (!matrix[i][j]) {
+            let neighbours = 
+                gen[row - width + j - 1] +
+                gen[row - width + j    ] +
+                gen[row - width + j + 1] +
+                gen[row         + j - 1] +
+                gen[row         + j + 1] +
+                gen[row + width + j - 1] +
+                gen[row + width + j    ] +
+                gen[row + width + j + 1]
+
+            if (!gen[row + j]) {
                 //If cell is dead
-                if (neighbours == 3) {
-                    nextGen[i][j] = 1
+                if (neighbours === 3) {
+                    nextGen[row + j] = 1
                 }
             } else {
                 //If cell is alive
                 if (neighbours < 2 || neighbours > 3) {
-                    nextGen[i][j] = 0
+                    nextGen[row + j] = 0
                 } else {
-                    nextGen[i][j] = 1
+                    nextGen[row + j] = 1
                 }
             }
         }
@@ -45,7 +37,6 @@ function calculateGeneration(matrix) {
 }
 
 Comlink.expose({
-    calculateGeneration,
-    generateMatrix
+    calculateGeneration
 })
 

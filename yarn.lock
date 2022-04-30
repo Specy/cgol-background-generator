@@ -495,11 +495,6 @@
   dependencies:
     "esutils" "^2.0.2"
 
-"email-validator@^2.0.4":
-  "integrity" "sha512-gYCwo7kh5S3IDyZPLZf6hSS0MnZT8QmJFqYvbqlDZSbwdZlY6QZWxJ4i/6UhITOJ4XzyI647Bm2MXKCLqnJ4nQ=="
-  "resolved" "https://registry.npmjs.org/email-validator/-/email-validator-2.0.4.tgz"
-  "version" "2.0.4"
-
 "emoji-regex@^8.0.0":
   "integrity" "sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A=="
   "resolved" "https://registry.npmjs.org/emoji-regex/-/emoji-regex-8.0.0.tgz"

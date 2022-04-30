@@ -41,7 +41,6 @@
     "color": "^4.2.1",
     "comlink": "^4.3.1",
     "cookie": "^0.4.1",
-    "email-validator": "^2.0.4",
     "sass": "^1.43.2",
     "svelte-awesome-color-picker": "^0.0.8",
     "svelte-icons": "^2.1.0"

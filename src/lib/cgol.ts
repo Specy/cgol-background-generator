@@ -1,14 +1,13 @@
 import * as Comlink from 'comlink'
 import Color from 'color'
 interface CgolSW {
-    generateMatrix: (width: number, height: number) => Promise<Uint8ClampedArray[]>
-    calculateGeneration: (matrix: Uint8ClampedArray[]) => Promise<Uint8ClampedArray[]>
+    calculateGeneration: (gen: ArrayBufferLike, width: number, height:number) => Promise<Uint8ClampedArray>
 }
 export const DEFAULT_PALETTE = ["#283049", "#404B69", "#278EA5", "#134753"]
 export const DEFAULT_COLOR = '#FF0074'
 export const DEFAULT_BACKGROUND = "#0f0d19"
 class Cgol {
-    matrix: Uint8ClampedArray[]
+    gen: Uint8ClampedArray
     width = 0
     height = 0
     private changeColorEvery = 15
@@ -17,17 +16,16 @@ class Cgol {
     private trailLength = 15
     trailToggled = true
     bgColor: Color
-    generations: Uint8ClampedArray[][] = []
+    generations: Uint8ClampedArray[] = []
     generationCounter = 0
     palette: Color[]
     mainColor: Color
     currentColor: Color
     context: CanvasRenderingContext2D
     context2: CanvasRenderingContext2D
-    generateMatrix: (width: number, height: number) => Promise<Uint8ClampedArray[]>
-    calculateGeneration: (matrix: Uint8ClampedArray[]) => Promise<Uint8ClampedArray[]>
+    sw: CgolSW
     constructor(changeColorEvery = 15, trailLength = 15) {
-        this.matrix = []
+        this.gen = new Uint8ClampedArray(0)
         this.changeColorEvery = changeColorEvery
         this.trailLength = trailLength
         this.mainColor = new Color(DEFAULT_COLOR)
@@ -50,10 +48,8 @@ class Cgol {
     async init(width: number, height: number, context: CanvasRenderingContext2D, contxt2: CanvasRenderingContext2D): Promise<void> {
         width = Math.floor(width)
         height = Math.floor(height)
-        const { generateMatrix, calculateGeneration } = Comlink.wrap(new Worker('cgol-sw.js')) as CgolSW
-        this.generateMatrix = generateMatrix
-        this.calculateGeneration = calculateGeneration
-        this.matrix = await this.generateMatrix(width, height)
+        this.sw = Comlink.wrap(new Worker('cgol-sw.js')) as CgolSW
+        this.gen = new Uint8ClampedArray(width * height)
         this.trailData = new Uint8ClampedArray(width * height * 4)
         this.width = width
         this.height = height
@@ -66,11 +62,9 @@ class Cgol {
         this.context2 = null
     }
     randomize(bias = 0.4): void {
-        const { width, height, matrix } = this
-        for (let i = 0; i < height; i++) {
-            for (let j = 0; j < width; j++) {
-                if (!matrix[i][j]) matrix[i][j] = (Math.round(Math.random() - bias))
-            }
+        const { width, height, gen } = this
+        for(let i = 0; i < width * height; i++) {
+            if (!gen[i]) gen[i] = (Math.round(Math.random() - bias))
         }
         this.generationCounter++
     }
@@ -86,7 +80,7 @@ class Cgol {
         if (this.context2) this.context2.canvas.height = finalHeight
         this.context?.clearRect(0, 0, this.width, this.height)
         this.context2?.clearRect(0, 0, this.width, this.height)
-        this.matrix = await this.generateMatrix(finalWidth, finalHeight)
+        this.gen = new Uint8ClampedArray(finalWidth * finalHeight)
         this.context?.clearRect(0, 0, finalWidth, finalHeight)
         this.context2?.clearRect(0, 0, finalWidth, finalHeight)
         this.trailData = new Uint8ClampedArray(finalWidth * finalHeight * 4)
@@ -99,30 +93,30 @@ class Cgol {
     }
     async tick(): Promise<void> {
         const generationNumber = this.generationCounter
-        const nextGeneration = await this.calculateGeneration(this.matrix)
+        const nextGeneration = await this.sw.calculateGeneration(this.gen, this.width, this.height)
         if (this.generationCounter === generationNumber) {
-            this.addGeneration(this.matrix)
-            this.matrix = nextGeneration
+            this.addGeneration(this.gen)
+            this.gen = nextGeneration
             this.generationCounter++
         }
     }
     async step(direction: number): Promise<void> {
-
         if (direction > 0) {
             await this.tick()
         } else {
             if (this.generations.length <= 0) return
-            this.matrix = this.generations.pop()
+            this.gen = this.generations.pop()
         }
 
     }
 
     paintNoise(x: number, y: number, noise: number): void {
+        const {width} = this
         try {
             for (let i = 0; i < noise; i++) {
                 const noiseX = Math.round(Math.random() * -20 + 15)
                 const noiseY = Math.round(Math.random() * -20 + 15)
-                this.matrix[y + noiseY][x + noiseX] = 1
+                this.gen[(x + noiseX) + (y + noiseY) * width] = 1
             }
             this.generationCounter++
         } catch (e) { return }
@@ -133,7 +127,7 @@ class Cgol {
     }
     drawOnLayer(layer: 1 | 2, erase: boolean): void {
 
-        const { width, height, matrix, trailData } = this
+        const { width, height, gen, trailData } = this
         const context = layer === 1 ? this.context : this.context2
         const rgbObj = layer === 1 ? this.mainColor.object() : this.generationColor.object()
         const data = erase ? new Uint8ClampedArray(width * height * 4).fill(0) : trailData
@@ -146,7 +140,7 @@ class Cgol {
                     counter += 4
                 } else {
                     //if it's not, add each subpixel data
-                    if (matrix[i][j]) {
+                    if (gen[i * width + j]) {
                         //if the cell is alive add the selected color to the data
                         data[counter] = rgbObj.r
                         data[counter + 1] = rgbObj.g
@@ -165,11 +159,11 @@ class Cgol {
 
         if (!erase) this.trailData = data
         //actually draw the image generated above
-        context.putImageData(new ImageData(data, width, height), 0, 0)
+        context.putImageData(new ImageData(new Uint8ClampedArray(data), width, height), 0, 0)
 
     }
 
-    private addGeneration(generation: Uint8ClampedArray[]): void {
+    private addGeneration(generation: Uint8ClampedArray): void {
         if (this.generations.length > this.trailLength) {
             this.generations.shift()
         }

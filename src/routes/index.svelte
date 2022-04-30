@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Cgol } from '$lib/cgol'
 	import { browser } from '$app/env'
-	import { onMount } from 'svelte'
+	import { onDestroy, onMount } from 'svelte'
 	import Controls from '$cmp/index/Controls.svelte'
 	import Color from 'color'
 	import { toast } from '$cmp/toast'
@@ -16,6 +16,8 @@
 	let context2: CanvasRenderingContext2D
 	let rid = 0
 	let isPressing = false
+	let onIdle = setTimeout(() => {}, 0)
+	let isIdle = false
 	async function handleFrame() {
 		try {
 			currentTime = Date.now()
@@ -50,7 +52,9 @@
 		cgol.setPalette($palette)
 		cgol.randomize()
 		handleFrame()
-		return () => cancelAnimationFrame(rid)
+	})
+	onDestroy(() => {
+		if(browser) cancelAnimationFrame(rid)
 	})
 	function handleStep({ detail }: CustomEvent<number>) {
 		cgol.step(detail)
@@ -59,9 +63,14 @@
 
 	function handlePointer(eventX: number, eventY: number, e: any) {
 		//@ts-ignore
+		clearTimeout(onIdle)
+		isIdle = false
+		onIdle = setTimeout(() => {
+			isIdle = true
+		}, 10000)
 		if (!isPressing || e.target?.tagName !== 'CANVAS') return
-		const x = Math.floor((eventX / width) * cgol.width)
-		const y = Math.floor((eventY / height) * cgol.height)
+		const x = Math.floor((eventX / window.innerWidth) * cgol.width)
+		const y = Math.floor((eventY / window.innerHeight) * cgol.height)
 		const noise = Math.round(Math.random() * 10 + 30)
 		cgol.paintNoise(x, y, noise)
 	}
@@ -106,6 +115,7 @@
 	</div>
 
 	<Controls
+		visible={!isIdle}
 		on:clear={() => {
 			const newWidth = window.innerWidth
 			const newHeight = window.innerHeight

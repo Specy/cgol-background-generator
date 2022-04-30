@@ -25,6 +25,7 @@
 	export let isPlaying = true
 	export let maxFps = 60
 	export let trailToggled = true
+	export let visible = true
 	let isOpen = false
 	let isFullscreen = false
 	let maskColor = new Color(backgroundColor)
@@ -35,7 +36,7 @@
 </script>
 
 <svelte:window on:fullscreenchange={() => isFullscreen = document.fullscreenElement !== null} />
-<div class="floating-buttons">
+<div class="floating-buttons" class:visible>
 	{#if browser && document?.fullscreenEnabled}
 		<Button
 			style="height: 2.5rem; width: 2.5rem; padding: 0; "
@@ -138,6 +139,8 @@
 		right: 1rem;
 		bottom: 1rem;
 		z-index: 999;
+		opacity: 0.6;
+		transition: all 0.3s;
 	}
 	.controls-mask {
 		background-color: rgb(15 13 25 / 70%);
@@ -176,6 +179,9 @@
 	}
 	.icon {
 		width: 1rem;
+	}
+	.visible{
+		opacity: 1;
 	}
 	@media (max-width: 850px) {
 		.controls {
