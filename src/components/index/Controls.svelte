@@ -153,6 +153,7 @@
 		border-top-left-radius: 1.8rem;
 		border-top-right-radius: 1.8rem;
 		opacity: 0;
+		will-change: opacity, transform, backdrop-filter;
 		overflow: hidden;
 	}
 	.controls {
